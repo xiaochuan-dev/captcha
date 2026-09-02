@@ -74,7 +74,6 @@ jobs:
             --num_workers 2 \
             --data_dir data/ \
             --output_dir results/ \
-            --model_path models/model.pth
       
       - name: 上传结果
         uses: actions/upload-artifact@v4
