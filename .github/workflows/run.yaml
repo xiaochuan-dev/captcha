@@ -68,7 +68,7 @@ jobs:
       
       - name: 执行分段预测
         run: |
-          python predict_range.py \
+          python -m src.dataset.get_label \
             --start ${{ steps.calc.outputs.start }} \
             --end ${{ steps.calc.outputs.end }} \
             --num_workers 2 \
