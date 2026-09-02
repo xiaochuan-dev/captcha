@@ -5,7 +5,6 @@ from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import time
 from paddleocr import PaddleOCR
-from tqdm import tqdm
 
 def parse_args():
     parser = argparse.ArgumentParser()
