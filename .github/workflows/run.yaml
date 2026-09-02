@@ -1,0 +1,83 @@
+name: 图片预测 - 完全并行
+
+on:
+  workflow_dispatch:
+    inputs:
+      total_images:
+        description: '总图片数'
+        required: true
+        default: '80000'
+      num_jobs:
+        description: '并行任务数 (每个任务处理 total_images/num_jobs 张)'
+        required: true
+        default: '8'
+        type: choice
+        options:
+          - '4'
+          - '8'
+          - '16'
+          - '20'
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false  # 一个失败不影响其他
+      matrix:
+        # 自动生成分段范围
+        segment: [0, 1, 2, 3, 4, 5, 6, 7]  # 最多20个
+    
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: 计算编号范围
+        id: calc
+        run: |
+          TOTAL=${{ github.event.inputs.total_images }}
+          NUM_JOBS=${{ github.event.inputs.num_jobs }}
+          SEGMENT=${{ matrix.segment }}
+          
+          # 计算每个任务处理多少张
+          PER_JOB=$(( (TOTAL + NUM_JOBS - 1) / NUM_JOBS ))
+          START=$(( SEGMENT * PER_JOB ))
+          END=$(( START + PER_JOB ))
+          
+          # 最后一段处理到总数
+          if [ $END -gt $TOTAL ]; then
+            END=$TOTAL
+          fi
+          
+          echo "start=$START" >> $GITHUB_OUTPUT
+          echo "end=$END" >> $GITHUB_OUTPUT
+          
+          echo "处理范围: $START - $END"
+      
+      - name: 下载数据
+        run: |
+          mkdir -p data
+          curl -L -o images.zip https://github.com/xiaochuan-dev/captcha/releases/download/v0.0.1/data.zip
+          unzip -q images.zip -d data/
+      
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: 安装依赖
+        run: pip install paddlepaddle paddleocr
+      
+      - name: 执行分段预测
+        run: |
+          python predict_range.py \
+            --start ${{ steps.calc.outputs.start }} \
+            --end ${{ steps.calc.outputs.end }} \
+            --num_workers 2 \
+            --data_dir data/ \
+            --output_dir results/ \
+            --model_path models/model.pth
+      
+      - name: 上传结果
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-segment-${{ matrix.segment }}
+          path: results/
