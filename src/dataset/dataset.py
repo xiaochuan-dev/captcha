@@ -31,6 +31,15 @@ class CaptchaDataset(Dataset):
 
         return img, label, label_str
 
+def ctc_collate_fn(batch):
+    imgs, labels, label_lengths = zip(*batch)
+    imgs = torch.stack(imgs, 0)
+
+    labels = torch.cat(labels, dim=0)
+    label_lengths = torch.tensor(label_lengths, dtype=torch.long)
+
+    return imgs, labels, label_lengths
+
 if __name__ == '__main__':
     dataset = CaptchaDataset('./captcha_dataset.pt')
 
