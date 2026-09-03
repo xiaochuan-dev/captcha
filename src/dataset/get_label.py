@@ -50,21 +50,24 @@ def get_label(start, end):
     l = len(result1)
 
     for item in result1:
-        text1 = item["rec_texts"][0]
         input_path = item["input_path"]
         if input_path not in data:
             data[input_path] = {}
     
-        if text1 is None:
+        if "rec_texts" in item and item["rec_texts"]:
+            text1 = item["rec_texts"][0]
+        else:
             text1 = ""
         data[input_path]["text1"] = text1
     
     for item in result2:
-        text2 = item["rec_texts"][0]
+
         input_path = item["input_path"]
         if input_path not in data:
             data[input_path] = {}
-        if text2 is None:
+        if "rec_texts" in item and item["rec_texts"]:
+            text2 = item["rec_texts"][0]
+        else:
             text2 = ""
         data[input_path]["text2"] = text2
 
