@@ -44,6 +44,8 @@ def train():
 
     transform = transforms.Compose([
         transforms.ConvertImageDtype(torch.float32),
+        transforms.RandomAffine(degrees=3, translate=(0.03, 0.03)),
+        transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 0.5)),
     ])
 
     full_dataset = CaptchaDataset('./captcha_dataset.pt', transform=transform)
@@ -68,9 +70,9 @@ def train():
         img_w=128,
         patch_h=8,
         patch_w=8,
-        dim=192,
-        depth=6,
-        heads=3,
+        dim=256,
+        depth=8,
+        heads=4,
         num_classes=num_classes,
         channels=1,
     ).to(device)
