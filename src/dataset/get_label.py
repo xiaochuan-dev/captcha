@@ -42,7 +42,11 @@ def get_label(start, end):
     else:
         data = {} 
 
-    image_paths = [f"./data/captcha_{i:05d}.jpg" for i in range(start, end)]
+    image_paths = [
+        f"./data/captcha_{i:05d}.jpg" 
+        for i in range(start, end) 
+        if os.path.exists(f"./data/captcha_{i:05d}.jpg")
+    ]
 
     result1 = ocrv5.predict(image_paths)
     result2 = ocrv6.predict(image_paths)
