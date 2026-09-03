@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     i = 0
 
-    batch_size = 5000
+    batch_size = 1000
 
     while i < 80000:
         get_label(i, i + batch_size)
