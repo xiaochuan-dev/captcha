@@ -108,8 +108,8 @@ def train():
     model = CaptchaViT(
         img_h=32,
         img_w=128,
-        patch_h=8,
-        patch_w=8,
+        patch_h=4,
+        patch_w=4,
         dim=256,
         depth=8,
         heads=4,
