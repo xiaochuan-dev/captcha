@@ -13,16 +13,17 @@ from .dataset.dataset import CaptchaDataset, ctc_collate_fn
 def download_pt():
 
     if not os.path.exists('./captcha_dataset.pt'):
-        zip_path = hf_hub_download(
+        path = hf_hub_download(
             repo_id="freexiaochuan/captcha",
             filename="captcha_dataset.pt",
             repo_type="dataset"
         )
 
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(".")
-        
-        print("解压完成！在 . 目录下")
+        if os.path.exists('./captcha_dataset.pt'):
+            print("文件下载成功")
+        else:
+            print("文件下载失败")
+
 
 def decode_prediction(logits, idx2char, blank_idx=0):
     pred = logits.argmax(dim=-1)
