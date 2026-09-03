@@ -14,7 +14,7 @@ from .model import CaptchaViT
 from .train import decode_prediction
 
 def download_model():
-    if os.path.exists('./best.pth'):
+    if not os.path.exists('./best.pth'):
         hf_hub_download(
             repo_id="freexiaochuan/captcha",
             filename="best.pth",
