@@ -35,8 +35,12 @@ ocrv5 = PaddleOCR(
 )
 
 def get_label(start, end):
-    with open('./data.json', 'r', encoding='utf-8') as f:
-        data = json.load(f) 
+    data_file = './data.json'
+    if os.path.exists(data_file) and os.path.getsize(data_file) > 0:
+        with open(data_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    else:
+        data = {} 
 
     image_paths = [f"./data/captcha_{i:05d}.jpg" for i in range(start, end)]
 
