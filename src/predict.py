@@ -21,7 +21,12 @@ def download_model():
             repo_type="dataset",
             local_dir="./"
         )
-
+        hf_hub_download(
+            repo_id="freexiaochuan/captcha",
+            filename="captcha_dataset.pt",
+            repo_type="dataset",
+            local_dir="./"
+        )
         if os.path.exists('./captcha_dataset.pt'):
             print("文件下载成功")
         else:
