@@ -125,6 +125,8 @@ def predict(filepaths):
 
 if __name__ == '__main__':
 
+    download_model()
+
     data_file = './model_predict_data.json'
     if os.path.exists(data_file) and os.path.getsize(data_file) > 0:
         with open(data_file, 'r', encoding='utf-8') as f:
