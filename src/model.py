@@ -15,6 +15,8 @@ class CaptchaViT(nn.Module):
         heads=3,
         num_classes=37,
         channels=1,
+        emb_dropout=0.1,
+        dropout=0.1,
     ):
         super().__init__()
         assert img_h % patch_h == 0 and img_w % patch_w == 0
@@ -34,17 +36,19 @@ class CaptchaViT(nn.Module):
         )
 
         self.pos_embedding = nn.Parameter(torch.randn(1, num_patches, dim))
+        self.emb_dropout = nn.Dropout(emb_dropout)
 
         self.encoder = Encoder(
             dim=dim,
             depth=depth,
             heads=heads,
             ff_mult=4,
-            attn_dropout=0.1,
-            ff_dropout=0.1,
+            attn_dropout=0.15,
+            ff_dropout=0.15,
         )
 
         self.norm = nn.LayerNorm(dim)
+        self.dropout = nn.Dropout(dropout)
         self.to_logits = nn.Linear(dim, num_classes)
 
     def forward(self, x):
@@ -63,9 +67,11 @@ class CaptchaViT(nn.Module):
 
         x = self.to_patch_embedding(x)
         x = x + self.pos_embedding
+        x = self.emb_dropout(x)
 
         x = self.encoder(x)
         x = self.norm(x)
+        x = self.dropout(x)
 
         logits = self.to_logits(x)
         return logits
