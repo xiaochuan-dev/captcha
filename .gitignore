@@ -6,3 +6,4 @@ data.zip
 label.txt
 test.py
 *.pt
+*.pth
