@@ -2,27 +2,29 @@ import os
 import zipfile
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, random_split, Subset
 from torchvision import transforms
 from tqdm import tqdm
 from huggingface_hub import hf_hub_download
 
-from model import CaptchaViT
-from dataset.dataset import CaptchaDataset, ctc_collate_fn
+from .model import CaptchaViT
+from .dataset.dataset import CaptchaDataset, ctc_collate_fn
 
 def download_pt():
 
     if not os.path.exists('./captcha_dataset.pt'):
-        zip_path = hf_hub_download(
+        path = hf_hub_download(
             repo_id="freexiaochuan/captcha",
             filename="captcha_dataset.pt",
-            repo_type="dataset"
+            repo_type="dataset",
+            local_dir="./"
         )
 
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(".")
-        
-        print("解压完成！在 . 目录下")
+        if os.path.exists('./captcha_dataset.pt'):
+            print("文件下载成功")
+        else:
+            print("文件下载失败")
+
 
 def decode_prediction(logits, idx2char, blank_idx=0):
     pred = logits.argmax(dim=-1)
@@ -40,35 +42,77 @@ def train():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print("Using device:", device)
 
-    transform = transforms.Compose([
+    train_transform = transforms.Compose([
+        transforms.ConvertImageDtype(torch.float32),
+        transforms.RandomAffine(
+            degrees=3,
+            translate=(0.03, 0.03)
+        ),
+        transforms.GaussianBlur(
+            kernel_size=3,
+            sigma=(0.1, 0.5)
+        ),
+    ])
+
+    val_transform = transforms.Compose([
         transforms.ConvertImageDtype(torch.float32),
     ])
 
-    full_dataset = CaptchaDataset('./captcha_dataset.pt', transform=transform)
+    full_dataset = CaptchaDataset(
+        './captcha_dataset.pt',
+        transform=None
+    )
+
     num_classes = full_dataset.num_classes
     idx2char = full_dataset.idx2char
 
     train_size = int(0.9 * len(full_dataset))
     val_size = len(full_dataset) - train_size
-    train_set, val_set = random_split(full_dataset, [train_size, val_size])
+
+    indices = torch.randperm(len(full_dataset)).tolist()
+
+    train_indices = indices[:train_size]
+    val_indices = indices[train_size:]
+
+    train_dataset = CaptchaDataset(
+        './captcha_dataset.pt',
+        transform=train_transform
+    )
+
+    val_dataset = CaptchaDataset(
+        './captcha_dataset.pt',
+        transform=val_transform
+    )
+
+    train_set = Subset(train_dataset, train_indices)
+    val_set = Subset(val_dataset, val_indices)
 
     train_loader = DataLoader(
-        train_set, batch_size=64, shuffle=True,
-        num_workers=4, pin_memory=True, collate_fn=ctc_collate_fn
+        train_set,
+        batch_size=64,
+        shuffle=True,
+        num_workers=4,
+        pin_memory=True,
+        collate_fn=ctc_collate_fn
     )
+
     val_loader = DataLoader(
-        val_set, batch_size=64, shuffle=False,
-        num_workers=4, pin_memory=True, collate_fn=ctc_collate_fn
+        val_set,
+        batch_size=64,
+        shuffle=False,
+        num_workers=4,
+        pin_memory=True,
+        collate_fn=ctc_collate_fn
     )
 
     model = CaptchaViT(
         img_h=32,
         img_w=128,
-        patch_h=8,
-        patch_w=8,
-        dim=192,
-        depth=6,
-        heads=3,
+        patch_h=4,
+        patch_w=4,
+        dim=256,
+        depth=8,
+        heads=4,
         num_classes=num_classes,
         channels=1,
     ).to(device)

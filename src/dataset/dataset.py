@@ -10,6 +10,7 @@ class CaptchaDataset(Dataset):
         self.transform = transform
 
         self.charset = '0123456789abcdefghijklmnopqrstuvwxyz'
+        self.num_classes = len(self.charset)
         self.char2idx = {c: i + 1 for i, c in enumerate(self.charset)}
         self.idx2char = {i + 1: c for i, c in enumerate(self.charset)}
         self.blank = 0
@@ -29,7 +30,7 @@ class CaptchaDataset(Dataset):
         label_str = self.labels[idx]
         label = torch.tensor([self.char2idx[c] for c in label_str], dtype=torch.long)
 
-        return img, label, label_str
+        return img, label, len(label)
 
 def ctc_collate_fn(batch):
     imgs, labels, label_lengths = zip(*batch)
