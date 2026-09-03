@@ -49,21 +49,25 @@ def get_label(start, end):
 
     l = len(result1)
 
-    for i in range(l):
-        text1 = result1[i]["rec_texts"][0]
-        text2 = result2[i]["rec_texts"][0]
-
-        input_path = result1[i]["input_path"]
-
+    for item in result1:
+        text1 = item["rec_texts"][0]
+        input_path = item["input_path"]
+        if input_path not in data:
+            data[input_path] = {}
+    
         if text1 is None:
             text1 = ""
+        data[input_path]["text1"] = text1
+    
+    for item in result2:
+        text2 = item["rec_texts"][0]
+        input_path = item["input_path"]
+        if input_path not in data:
+            data[input_path] = {}
         if text2 is None:
             text2 = ""
+        data[input_path]["text2"] = text2
 
-        data[input_path] = {
-            "t1": text1,
-            "t2": text2
-        }
     with open('./data.json', 'w+', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
     print(f"{start}-{end} done")
