@@ -7,8 +7,8 @@ from torchvision import transforms
 from tqdm import tqdm
 from huggingface_hub import hf_hub_download
 
-from model import CaptchaViT
-from dataset.dataset import CaptchaDataset, ctc_collate_fn
+from .model import CaptchaViT
+from .dataset.dataset import CaptchaDataset, ctc_collate_fn
 
 def download_pt():
 
