@@ -130,7 +130,7 @@ def predict(filepaths):
 
 if __name__ == '__main__':
 
-    download_model()
+    # download_model()
 
     data_file = './model_predict_data.json'
     if os.path.exists(data_file) and os.path.getsize(data_file) > 0:
@@ -156,7 +156,7 @@ if __name__ == '__main__':
         for filepath, result in results.items():
             data[filepath] = result
         
-        with open('./data.json', 'w+', encoding='utf-8') as f:
+        with open(data_file, 'w+', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         print(f"{i}-{i + step} done")
         i += step
