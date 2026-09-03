@@ -16,7 +16,8 @@ def download_pt():
         path = hf_hub_download(
             repo_id="freexiaochuan/captcha",
             filename="captcha_dataset.pt",
-            repo_type="dataset"
+            repo_type="dataset",
+            local_dir="./"
         )
 
         if os.path.exists('./captcha_dataset.pt'):
