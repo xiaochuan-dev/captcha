@@ -23,7 +23,7 @@ def save():
         text1 = value["text1"]
         text2 = value["text2"]
         
-        if text1 == text2 and len(text1) == 4:
+        if text1 == text2 and len(text1) == 4 and text1.isalnum() and text1.islower():
             img = Image.open(key).convert('L')
             img = resize_keep_ratio(img)
             img_array = np.array(img)
