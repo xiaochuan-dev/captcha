@@ -19,9 +19,8 @@ class CaptchaDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        img = self.images[idx]                        # (32, 128)
-        img = torch.from_numpy(img).float() / 255.0   # 归一化到 0~1
-        img = img.unsqueeze(0)                        # (1, 32, 128)
+        img = self.images[idx]
+        img = torch.from_numpy(img).unsqueeze(0)
 
         if self.transform:
             img = self.transform(img)
