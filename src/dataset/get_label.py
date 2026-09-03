@@ -81,7 +81,7 @@ def get_label(start, end):
 
 if __name__ == '__main__':
 
-    i = 0
+    i = 42000
 
     batch_size = 1000
 
