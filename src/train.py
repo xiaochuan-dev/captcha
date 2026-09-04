@@ -44,10 +44,10 @@ def train():
 
     train_transform = transforms.Compose([
         transforms.ConvertImageDtype(torch.float32),
-        transforms.RandomAffine(
-            degrees=1.5,
-            translate=(0.015, 0.015)
-        ),
+        # transforms.RandomAffine(
+        #     degrees=1.5,
+        #     translate=(0.015, 0.015)
+        # ),
     ])
 
     val_transform = transforms.Compose([
