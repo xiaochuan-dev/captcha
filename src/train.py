@@ -48,10 +48,6 @@ def train():
             degrees=3,
             translate=(0.03, 0.03)
         ),
-        transforms.GaussianBlur(
-            kernel_size=3,
-            sigma=(0.1, 0.5)
-        ),
     ])
 
     val_transform = transforms.Compose([
