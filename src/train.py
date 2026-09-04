@@ -102,10 +102,10 @@ def train():
         img_w=128,
         dim=256,
         depth=6,
-        heads=8,
+        heads=4,
         num_classes=num_classes,
         channels=1,
-        dropout=0.1,
+        dropout=0.2,
     ).to(device)
 
     criterion = nn.CTCLoss(blank=0, zero_infinity=True)
