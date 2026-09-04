@@ -7,7 +7,7 @@ from torchvision import transforms
 from tqdm import tqdm
 from huggingface_hub import hf_hub_download
 
-from .model import CaptchaViT
+from .model import CaptchaViT, CaptchaCNNTransformer
 from .dataset.dataset import CaptchaDataset, ctc_collate_fn
 
 def download_pt():
@@ -105,16 +105,15 @@ def train():
         collate_fn=ctc_collate_fn
     )
 
-    model = CaptchaViT(
+    model = CaptchaCNNTransformer(
         img_h=32,
         img_w=128,
-        patch_h=4,
-        patch_w=4,
         dim=256,
-        depth=8,
+        depth=6,
         heads=4,
         num_classes=num_classes,
         channels=1,
+        dropout=0.1,
     ).to(device)
 
     criterion = nn.CTCLoss(blank=0, zero_infinity=True)
