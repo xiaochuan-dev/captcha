@@ -41,12 +41,15 @@ def save_predict():
     with open('./model_predict_data.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
 
+    with open('./a.txt', 'r', encoding='utf-8') as ff:
+        num = int(ff.read())
+
     img_list = []
     label_list = []
 
     count = 0
     for key, value in data.items():
-        if count > 3700:
+        if count > num:
             break
         img = Image.open(key).convert('L')
         img = resize_keep_ratio(img)
