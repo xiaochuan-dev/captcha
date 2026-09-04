@@ -45,8 +45,8 @@ def train():
     train_transform = transforms.Compose([
         transforms.ConvertImageDtype(torch.float32),
         transforms.RandomAffine(
-            degrees=3,
-            translate=(0.03, 0.03)
+            degrees=1.5,
+            translate=(0.015, 0.015)
         ),
     ])
 
