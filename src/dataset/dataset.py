@@ -9,7 +9,7 @@ class CaptchaDataset(Dataset):
         self.labels = data['labels']
         self.transform = transform
 
-        self.charset = '0123456789abcdefghijklmnopqrstuvwxyz'
+        self.charset = '2345678abcdefgmnpwxy'
         self.num_classes = len(self.charset) + 1
         self.char2idx = {c: i + 1 for i, c in enumerate(self.charset)}
         self.idx2char = {i + 1: c for i, c in enumerate(self.charset)}

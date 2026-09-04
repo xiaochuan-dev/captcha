@@ -12,15 +12,15 @@ from .dataset.dataset import CaptchaDataset, ctc_collate_fn
 
 def download_pt():
 
-    if not os.path.exists('./captcha_dataset.pt'):
+    if not os.path.exists('./new_dataset.pt'):
         path = hf_hub_download(
             repo_id="freexiaochuan/captcha",
-            filename="captcha_dataset.pt",
+            filename="new_dataset.pt",
             repo_type="dataset",
             local_dir="./"
         )
 
-        if os.path.exists('./captcha_dataset.pt'):
+        if os.path.exists('./new_dataset.pt'):
             print("文件下载成功")
         else:
             print("文件下载失败")
@@ -51,7 +51,7 @@ def train():
     ])
 
     full_dataset = CaptchaDataset(
-        './captcha_dataset.pt',
+        './new_dataset.pt',
         transform=None
     )
 
@@ -67,12 +67,12 @@ def train():
     val_indices = indices[train_size:]
 
     train_dataset = CaptchaDataset(
-        './captcha_dataset.pt',
+        './new_dataset.pt',
         transform=train_transform
     )
 
     val_dataset = CaptchaDataset(
-        './captcha_dataset.pt',
+        './new_dataset.pt',
         transform=val_transform
     )
 
