@@ -1,13 +1,27 @@
 import os
+import zipfile
+import json
 from paddleocr import PaddleOCR
+from huggingface_hub import hf_hub_download
 
-save_file = './label.txt'
+zip_path = hf_hub_download(
+    repo_id="freexiaochuan/captcha",
+    filename="data.zip",
+    repo_type="dataset"
+)
+
+with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+    zip_ref.extractall(".")
+    
+print("解压完成！图片在 . 目录下")
 
 ocrv6 = PaddleOCR(
     use_doc_orientation_classify=False,
     use_doc_unwarping=False,
     use_textline_orientation=False,
-    enable_mkldnn=False, 
+    enable_mkldnn=False,
+    device="gpu",
+    lang='en',
 )
 
 ocrv5 = PaddleOCR(
@@ -15,21 +29,62 @@ ocrv5 = PaddleOCR(
     use_doc_orientation_classify=False,
     use_doc_unwarping=False,
     use_textline_orientation=False,
-    enable_mkldnn=False, 
+    enable_mkldnn=False,
+    device="gpu",
+    lang='en', 
 )
 
-def get_label_v5():
-    with open(save_file, 'w+', encoding='utf-8') as f:
+def get_label(start, end):
+    data_file = './data.json'
+    if os.path.exists(data_file) and os.path.getsize(data_file) > 0:
+        with open(data_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    else:
+        data = {} 
 
-        image_paths = [f"./data/captcha_{i:05d}.jpg" for i in range(10)]  # 0到10，共11张
+    image_paths = [
+        f"./data/captcha_{i:05d}.jpg" 
+        for i in range(start, end) 
+        if os.path.exists(f"./data/captcha_{i:05d}.jpg")
+    ]
 
-        result1 = ocrv5.predict(image_paths)
-        for res in result1:
-            text = res["rec_texts"][0]
-            f.write(text)
-            f.write('\n')
-        
+    result1 = ocrv5.predict(image_paths)
+    result2 = ocrv6.predict(image_paths)
+
+    l = len(result1)
+
+    for item in result1:
+        input_path = item["input_path"]
+        if input_path not in data:
+            data[input_path] = {}
+    
+        if "rec_texts" in item and item["rec_texts"]:
+            text1 = item["rec_texts"][0]
+        else:
+            text1 = ""
+        data[input_path]["text1"] = text1
+    
+    for item in result2:
+
+        input_path = item["input_path"]
+        if input_path not in data:
+            data[input_path] = {}
+        if "rec_texts" in item and item["rec_texts"]:
+            text2 = item["rec_texts"][0]
+        else:
+            text2 = ""
+        data[input_path]["text2"] = text2
+
+    with open('./data.json', 'w+', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    print(f"{start}-{end} done")
 
 if __name__ == '__main__':
-    get_label_v5()
-    
+
+    i = 0
+
+    batch_size = 1000
+
+    while i < 80000:
+        get_label(i, i + batch_size)
+        i += batch_size
