@@ -13,6 +13,7 @@ from .dataset.download_utils import download_file
 
 def decode_prediction(logits, idx2char, blank_idx=0):
     pred = logits.argmax(dim=-1)
+
     prev = blank_idx
     chars = []
     for p in pred:
