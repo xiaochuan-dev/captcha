@@ -9,22 +9,7 @@ from huggingface_hub import hf_hub_download
 
 from .model import CaptchaViT, CaptchaCNNTransformer
 from .dataset.dataset import CaptchaDataset, ctc_collate_fn
-
-def download_pt():
-
-    if not os.path.exists('./new_dataset.pt'):
-        path = hf_hub_download(
-            repo_id="freexiaochuan/captcha",
-            filename="new_dataset.pt",
-            repo_type="dataset",
-            local_dir="./"
-        )
-
-        if os.path.exists('./new_dataset.pt'):
-            print("文件下载成功")
-        else:
-            print("文件下载失败")
-
+from .dataset.download_utils import download_file
 
 def decode_prediction(logits, idx2char, blank_idx=0):
     pred = logits.argmax(dim=-1)
@@ -180,5 +165,5 @@ def train():
 
 
 if __name__ == '__main__':
-    download_pt()
+    download_file('new_dataset.pt')
     train()

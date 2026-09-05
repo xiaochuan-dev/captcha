@@ -2,7 +2,6 @@ import torch
 import numpy as np
 import os
 import json
-import zipfile
 
 from PIL import Image
 from torchvision import transforms
@@ -10,39 +9,12 @@ from huggingface_hub import hf_hub_download
 
 from .dataset.dataset import CaptchaDataset
 from .dataset.save import resize_keep_ratio
-from .model import CaptchaViT
+from .dataset.const import num_classes, idx2char
+from .model import CaptchaViT, CaptchaCNNTransformer
 from .train import decode_prediction
+from .dataset.download_utils import download_file, download_zip
 
-def download_model():
-    if not os.path.exists('./best.pth'):
-        hf_hub_download(
-            repo_id="freexiaochuan/captcha",
-            filename="best.pth",
-            repo_type="dataset",
-            local_dir="./"
-        )
-        hf_hub_download(
-            repo_id="freexiaochuan/captcha",
-            filename="captcha_dataset.pt",
-            repo_type="dataset",
-            local_dir="./"
-        )
-        if os.path.exists('./captcha_dataset.pt'):
-            print("文件下载成功")
-        else:
-            print("文件下载失败")
-    zip_path = hf_hub_download(
-        repo_id="freexiaochuan/captcha",
-        filename="data.zip",
-        repo_type="dataset"
-    )
-
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(".")
-        
-    print("解压完成！图片在 . 目录下") 
-
-def predict(filepaths):
+def predict(filepaths, model_path):
 
     device = torch.device(
         'cuda' if torch.cuda.is_available() else 'cpu'
@@ -54,29 +26,21 @@ def predict(filepaths):
         transforms.ConvertImageDtype(torch.float32),
     ])
 
-    full_dataset = CaptchaDataset(
-        './captcha_dataset.pt',
-        transform=transform
-    )
 
-    num_classes = full_dataset.num_classes
-    idx2char = full_dataset.idx2char
-
-    model = CaptchaViT(
+    model = CaptchaCNNTransformer(
         img_h=32,
         img_w=128,
-        patch_h=8,
-        patch_w=8,
-        dim=192,
+        dim=256,
         depth=6,
-        heads=3,
+        heads=4,
         num_classes=num_classes,
         channels=1,
+        dropout=0.2,
     ).to(device)
 
     model.load_state_dict(
         torch.load(
-            './best.pth',
+            model_path,
             map_location=device
         )
     )
@@ -128,13 +92,10 @@ def predict(filepaths):
 
     return results
 
-if __name__ == '__main__':
+def predict_with_model(model_path, output_path):
 
-    download_model()
-
-    data_file = './model_predict_data.json'
-    if os.path.exists(data_file) and os.path.getsize(data_file) > 0:
-        with open(data_file, 'r', encoding='utf-8') as f:
+    if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+        with open(output_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
     else:
         data = {}
@@ -151,13 +112,25 @@ if __name__ == '__main__':
             if os.path.exists(f"./data/captcha_{i:05d}.jpg")
         ]
     
-        results = predict(filepaths)
+        results = predict(filepaths, model_path)
 
         for filepath, result in results.items():
             data[filepath] = result
         
-        with open(data_file, 'w+', encoding='utf-8') as f:
+        with open(output_path, 'w+', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         print(f"{i}-{i + step} done")
         i += step
 
+
+if __name__ == '__main__':
+
+    model_filename = 'best_cnn.pth'
+    download_zip()
+    download_file(model_filename)
+
+    model_path = f'./{model_filename}'
+    output_path = './model_predict_cnn_data.json'
+
+    predict_with_model(model_path, output_path)
+    
