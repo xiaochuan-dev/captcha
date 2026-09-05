@@ -36,7 +36,6 @@ def export_to_onnx(model_path='./best.pth', output_path='model.onnx'):
         },
     )
 
-    # 检查
     onnx_model = onnx.load(output_path)
     onnx.checker.check_model(onnx_model)
 

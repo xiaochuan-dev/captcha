@@ -10,7 +10,7 @@ from huggingface_hub import hf_hub_download
 from .dataset.dataset import CaptchaDataset
 from .dataset.save import resize_keep_ratio
 from .dataset.const import num_classes, idx2char
-from .model import CaptchaViT, CaptchaCNNTransformer
+from .model import CaptchaCNNTransformer
 from .train import decode_prediction
 from .dataset.download_utils import download_file, download_zip
 
@@ -125,12 +125,13 @@ def predict_with_model(model_path, output_path):
 
 if __name__ == '__main__':
 
-    model_filename = 'best_cnn.pth'
-    download_zip()
-    download_file(model_filename)
+    model_filename = 'best.pth'
+    # download_zip()
+    # download_file(model_filename)
 
-    model_path = f'./{model_filename}'
-    output_path = './model_predict_cnn_data.json'
+    # model_path = f'./{model_filename}'
+    # output_path = './model_predict_cnn_data.json'
 
-    predict_with_model(model_path, output_path)
-    
+    # predict_with_model(model_path, output_path)
+    res = predict(['./captcha.jpg'], model_path=model_filename)
+    print(res)
