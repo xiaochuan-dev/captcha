@@ -7,3 +7,5 @@ label.txt
 test.py
 *.pt
 *.pth
+*.onnx
+*.data

@@ -1,5 +1,6 @@
 import torch
-from model import CaptchaCNNTransformer
+import onnx
+from .model import CaptchaCNNTransformer
 from .dataset.const import num_classes
 
 def export_to_onnx(model_path='./best.pth', output_path='model.onnx'):
@@ -25,17 +26,22 @@ def export_to_onnx(model_path='./best.pth', output_path='model.onnx'):
         dummy_input,
         output_path,
         export_params=True,
-        opset_version=11,
-        do_constant_folding=True,
+        dynamo=False,
+        opset_version=18,
         input_names=['input'],
         output_names=['output'],
         dynamic_axes={
             'input': {0: 'batch_size'},
-            'output': {0: 'batch_size'}
-        }
+            'output': {0: 'batch_size'},
+        },
     )
-    
-    print(f"模型已导出为: {output_path}")
+
+    # 检查
+    onnx_model = onnx.load(output_path)
+    onnx.checker.check_model(onnx_model)
+
+    print(f'模型已导出为: {output_path}')
+    print('ONNX 模型检查通过')
 
 if __name__ == '__main__':
     export_to_onnx()
