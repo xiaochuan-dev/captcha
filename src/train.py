@@ -1,13 +1,12 @@
 import os
-import zipfile
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split, Subset
 from torchvision import transforms
 from tqdm import tqdm
-from huggingface_hub import hf_hub_download
 
-from .model import CaptchaViT, CaptchaCNNTransformer
+from .dataset.const import num_classes, idx2char
+from .model import CaptchaCNNTransformer
 from .dataset.dataset import CaptchaDataset, ctc_collate_fn
 from .dataset.download_utils import download_file
 
@@ -28,42 +27,12 @@ def train():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print("Using device:", device)
 
-    train_transform = transforms.Compose([
-        transforms.ConvertImageDtype(torch.float32),
-    ])
+    transform = transforms.Compose([transforms.ConvertImageDtype(torch.float32)])
 
-    val_transform = transforms.Compose([
-        transforms.ConvertImageDtype(torch.float32),
-    ])
-
-    full_dataset = CaptchaDataset(
-        './new_dataset.pt',
-        transform=None
-    )
-
-    num_classes = full_dataset.num_classes
-    idx2char = full_dataset.idx2char
+    full_dataset = CaptchaDataset('./new_dataset.pt', transform=transform)
 
     train_size = int(0.9 * len(full_dataset))
-    val_size = len(full_dataset) - train_size
-
-    indices = torch.randperm(len(full_dataset)).tolist()
-
-    train_indices = indices[:train_size]
-    val_indices = indices[train_size:]
-
-    train_dataset = CaptchaDataset(
-        './new_dataset.pt',
-        transform=train_transform
-    )
-
-    val_dataset = CaptchaDataset(
-        './new_dataset.pt',
-        transform=val_transform
-    )
-
-    train_set = Subset(train_dataset, train_indices)
-    val_set = Subset(val_dataset, val_indices)
+    train_set, val_set = random_split(full_dataset, [train_size, len(full_dataset) - train_size])
 
     train_loader = DataLoader(
         train_set,

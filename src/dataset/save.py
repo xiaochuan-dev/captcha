@@ -10,33 +10,6 @@ def resize_keep_ratio(img, target_w=128, target_h=32):
     padding = (delta_w // 2, delta_h // 2, delta_w - delta_w // 2, delta_h - delta_h // 2)
     return ImageOps.expand(img, padding, fill=255)
 
-def save():
-
-    with open('./data.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    img_list = []
-    label_list = []
-
-    count = 0
-
-    for key, value in data.items():
-        text1 = value["text1"]
-        text2 = value["text2"]
-        
-        if text1 == text2 and len(text1) == 4 and text1.isalnum() and text1.islower():
-            img = Image.open(key).convert('L')
-            img = resize_keep_ratio(img)
-            img_array = np.array(img)
-            img_list.append(img_array)
-            label_list.append(text1)
-            count += 1
-        if count % 1000 == 0:
-            print(f'已处理 {count}')
-
-    all_images = np.stack(img_list, axis=0)
-    torch.save({'images': all_images, 'labels': label_list}, './captcha_dataset.pt')
-    print(f"保存完成！总共 {len(img_list)} 张，内存占用 {all_images.nbytes / 1024 / 1024:.2f} MB")
-
 def save_predict():
     with open('./model_predict_data.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
