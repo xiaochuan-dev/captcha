@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
-import numpy as np
+from .const import charset, num_classes, char2idx, idx2char, blank
 
 class CaptchaDataset(Dataset):
     def __init__(self, pt_path, transform=None):
@@ -9,11 +9,11 @@ class CaptchaDataset(Dataset):
         self.labels = data['labels']
         self.transform = transform
 
-        self.charset = '0123456789abcdefghijklmnopqrstuvwxyz'
-        self.num_classes = len(self.charset) + 1
-        self.char2idx = {c: i + 1 for i, c in enumerate(self.charset)}
-        self.idx2char = {i + 1: c for i, c in enumerate(self.charset)}
-        self.blank = 0
+        self.charset = charset
+        self.num_classes = num_classes
+        self.char2idx = char2idx
+        self.idx2char = idx2char
+        self.blank = blank
 
     def __len__(self):
         return len(self.images)
